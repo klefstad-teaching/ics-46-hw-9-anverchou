@@ -15,10 +15,6 @@ void error(const std::string & word1, const std::string & word2, const std::stri
 
 // Edit_distance
 bool edit_distance_within(const std::string & str1, const std::string & str2, int d) {
-    // Check if length difference is already greater
-    if (std::abs((int)str1.size() - (int)str2.size()) > d) {
-        return false;
-    }
 
     int n = static_cast<int>(str1.size());
     int m = static_cast<int>(str2.size());
@@ -49,10 +45,6 @@ bool edit_distance_within(const std::string & str1, const std::string & str2, in
                     dp[i - 1][j - 1]
                 });
             }
-            // Stop and return false if the distance exeeds
-            if (dp[i][j] > d) {
-                return false;
-            }
         }
     }
     // Final distance
@@ -61,61 +53,8 @@ bool edit_distance_within(const std::string & str1, const std::string & str2, in
 
 //is_adjacent
 bool is_adjacent(const std::string & word1, const std::string & word2) {
-    
-    // Check Lengths
-    int len1 = static_cast<int>(word1.size());
-    int len2 = static_cast<int>(word2.size());
-    int diff = len1 - len2;
-
-    // Cannot be adjavent if lengths differ more than 1
-    if (std::abs(diff) > 1) {
-        return false;
-    }
-
-    // Must differ in exactly one position if same length
-    if (len1 == len2) {
-        int mismatches = 0;
-        for (int i = 0; i < len1; i++) {
-            if (word1[i] != word2[i]) {
-                mismatches++;
-                if (mismatches > 1) {
-                    return false;
-                }
-            }
-        }
-        // True if mismatch is 1
-        return (mismatches == 1);
-    }
-
-    // If Word2 is one character longer, check if word1 can be formed
-    if (len1 + 1 == len2) {
-        // Check
-        int i = 0, j = 0;
-        bool foundExtra = false;
-        // Word2 should match word1 except by one char
-        while (i < len1 && j < len2) {
-            if (word1[i] == word2[j]) {
-                i++;
-                j++;
-            } else {
-                // Mismatch
-                if (foundExtra) {
-                    return false;
-                }
-                foundExtra = true;
-                j++;
-            }
-        }
-        return true;
-    }
-
-    // Word1 is one character longer
-    if (len1 - 1 == len2) {
-        // Flip 
-        return is_adjacent(word2, word1);
-    }
-    // Not adjacent
-    return false;
+    // Mean distance <= 1
+    return edit_distance_within(word1, word2, 1);
 }
 
 // Generate_word_ladder (BFS)
@@ -196,14 +135,16 @@ void load_words(std::set<std::string> & word_list, const std::string & file_name
 // Print word ladder
 void print_word_ladder(const std::vector<std::string> & ladder) {
     if (ladder.empty()) {
-        std::cout << "No ladder.\n";
+        std::cout << "No word ladder found.\n";
         return;
     }
-
+    std::cout << "Word ladder found: ";
     for (std::size_t i = 0; i < ladder.size(); i++) {
         std::cout << ladder[i];
         if (i + 1 < ladder.size()) {
-            std::cout << " => ";
+            std::cout << " ";
+        } else {
+            std::cout << " ";
         }
     }
     std::cout << "\n";
