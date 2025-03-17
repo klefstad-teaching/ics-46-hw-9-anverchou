@@ -67,7 +67,7 @@ void print_path(const std::vector<int> & path, int total) {
     // Return if path is empty
     if (path.empty()) {
         std::cout << "\n";
-        std::cout << "Total cost is " << cost << "\n";
+        std::cout << "Total cost is " << total << "\n";
         return;
     }
     for (std::size_t i = 0; i < path.size(); i++) {
