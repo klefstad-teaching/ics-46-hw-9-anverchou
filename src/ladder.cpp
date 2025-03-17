@@ -18,36 +18,45 @@ bool edit_distance_within(const std::string & str1, const std::string & str2, in
 
     int n = static_cast<int>(str1.size());
     int m = static_cast<int>(str2.size());
+    // Check lengths
+    if (std::abs(n - m) > d) {
+        return false;
+    }
 
+    // Make table (n + 1)(m + 1)
     // Edit distance
-    std::vector<std::vector<int>> dp(n + 1, std::vector<int>(m + 1, 0));
+    const int INF = d + 1;
+    std::vector<std::vector<int>> dp(n + 1, std::vector<int>(m + 1, INF));
 
     // Transofrm
-    for (int i = 0; i <= n; i++) {
+    dp[0][0] = 0;
+    for (int i = 1; i <= n && i <= d; i++) {
         dp[i][0] = i;
     }
-    for (int j = 0; j <= m; j++) {
+    for (int j = 1; j <= m && j <= d; j++) {
         dp[0][j] = j;
     }
 
-    // Fill Table 
+    // Fill 
     for (int i = 1; i <= n; i++) {
-        for (int j = 1; j <= m; j++) {
+        // j cannot be less than i - d or more than i + d
+        int start_j = std::max(1, i -d);
+        int end_j = std::min(m, i + d);
+
+        for (int j = start_j; j <= end_j; j++) {
             if (str1[i - 1] == str2[j - 1]) {
                 dp[i][j] = dp[i - 1][j - 1];
             } else {
-                dp[i][j] = 1 + std::min({
-                    // Delete
-                    dp[i - 1][j],
-                    // Insert
-                    dp[i][j - 1],
-                    // Replace
-                    dp[i - 1][j - 1]
-                });
+                // delete 
+                int del = dp[i - 1][j];
+                // Insert
+                int ins = dp[i][j - 1];
+                // Replace
+                int replace = dp[i - 1][j - 1];
+                dp[i][j] = 1 + std::min({del, ins, replace});
             }
         }
     }
-    // Final distance
     return (dp[n][m] <= d);
 }
 
