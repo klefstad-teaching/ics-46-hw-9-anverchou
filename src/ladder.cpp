@@ -1,6 +1,4 @@
 #include "ladder.h"
-#include <cmath>
-#include <cctype>
 
 #define my_assert(e) \
     {  \
@@ -76,6 +74,48 @@ bool is_adjacent(const std::string & word1, const std::string & word2) {
     return edit_distance_within(word1, word2, 1);
 }
 
+// Get_neighbors helper
+std::vector<std::string> get_neighbors(const std::string & word, const std::set<std::string> & word_list) {
+    std::vector<std::string> neighbors;
+
+    // Replacements
+    for (int i = 0; i < static_cast<int>(word.size()); ++i) {
+        char original = word[i];
+        for (char c = 'a'; c <= 'z'; ++c) {
+            if (c == original) continue;
+            std::string temp = word;
+            temp[i] = c;
+            if (word_list.find(temp) != word_list.end() && is_adjacent(word, temp)) {
+                neighbors.push_back(temp);
+            }
+        }
+    }
+
+    // Insertions
+    for (int i = 0; i <= static_cast<int>(word.size()); ++i) {
+        for (char c = 'a'; c <= 'z'; ++c) {
+            std::string temp = word;
+            temp.insert(temp.begin() + i, c);
+            if (word_list.find(temp) != word_list.end() && is_adjacent(word, temp)) {
+                neighbors.push_back(temp);
+            }
+        }
+    }
+
+    // Deletions
+    if (!word.empty()) {
+        for (int i = 0; i < static_cast<int>(word.size()); ++i) {
+            std::string temp = word;
+            temp.erase(temp.begin() + i);
+            if (word_list.find(temp) != word_list.end() && is_adjacent(word, temp)) {
+                neighbors.push_back(temp);
+            }
+        }
+    }
+
+    return neighbors;
+}
+
 // Generate_word_ladder (BFS)
 std::vector<std::string> generate_word_ladder(const std::string & begin_word, const std::string & end_word, const std::set<std::string> & word_list) {
     // If begin == end, treat as invalid
@@ -107,24 +147,20 @@ std::vector<std::string> generate_word_ladder(const std::string & begin_word, co
         // Last word in ladder
         const std::string & last_word = ladder.back();
 
-        // Scan dictionary
-        for (std::set<std::string>::const_iterator it = word_list.begin(); it != word_list.end(); ++it) {
-            const std::string & candidate = *it;
-
-            // Extend ladder if neighbor is not visited
-            if (is_adjacent(last_word, candidate) && visited.find(candidate) == visited.end()) {
+        // Generate valid neighbors
+        std::vector<std::string> neighbors = get_neighbors(last_word, word_list);
+        for (const std::string & candidate : neighbors) {
+            if (visited.find(candidate) == visited.end()) {
                 visited.insert(candidate);
-                
-                // Make a copy of the ladder, then add to candidate
+
+                // Extend current ladder
                 std::vector<std::string> new_ladder = ladder;
                 new_ladder.push_back(candidate);
 
-                // Return a new ladder if candidate == end_word
+                // Return immediately if at end_word
                 if (candidate == end_word) {
                     return new_ladder;
                 }
-                
-                // Enqueue to explore further
                 ladder_queue.push(new_ladder);
             }
         }
