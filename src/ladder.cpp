@@ -13,6 +13,52 @@ void error(const std::string & word1, const std::string & word2, const std::stri
     << ", word2 = " << word2 << "]\n";
 }
 
+// Edit_distance
+bool edit_distance_within(const std::string & str1, const std::string & str2, int d) {
+    // Check if length difference is already greater
+    if (std::abs((int)str1.size() - (int)str2.size()) > d) {
+        return false;
+    }
+
+    int n = static_cast<int>(str1.size());
+    int m = static_cast<int>(str2.size());
+
+    // Edit distance
+    std::vector<std::vector<int>> dp(n + 1, std::vector<int>(m + 1, 0));
+
+    // Transofrm
+    for (int i = 0; i <= n; i++) {
+        dp[i][0] = i;
+    }
+    for (int j = 0; j <= m; j++) {
+        dp[0][j] = j;
+    }
+
+    // Fill Table 
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            if (str1[i - 1] == str2[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1];
+            } else {
+                dp[i][j] = 1 + std::min({
+                    // Delete
+                    dp[i - 1][j],
+                    // Insert
+                    dp[i][j - 1],
+                    // Replace
+                    dp[i - 1][j - 1]
+                });
+            }
+            // Stop and return false if the distance exeeds
+            if (dp[i][j] > d) {
+                return false;
+            }
+        }
+    }
+    // Final distance
+    return (dp[n][m] <= d);
+}
+
 //is_adjacent
 bool is_adjacent(const std::string & word1, const std::string & word2) {
     
