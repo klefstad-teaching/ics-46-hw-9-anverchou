@@ -66,7 +66,8 @@ std::vector<int> extract_shortest_path(const std::vector<int> & distance, const 
 void print_path(const std::vector<int> & path, int total) {
     // Return if path is empty
     if (path.empty()) {
-        std::cout << "Path is empty.\n";
+        std::cout << "\n";
+        std::cout << "Total cost is " << cost << "\n";
         return;
     }
     for (std::size_t i = 0; i < path.size(); i++) {
