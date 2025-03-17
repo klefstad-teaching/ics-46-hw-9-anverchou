@@ -37,24 +37,34 @@ bool edit_distance_within(const std::string & str1, const std::string & str2, in
         dp[0][j] = j;
     }
 
-    // Fill 
     for (int i = 1; i <= n; i++) {
-        // j cannot be less than i - d or more than i + d
-        int start_j = std::max(1, i -d);
+        // J must be within these constraints
+        int start_j = std::max(1, i - d);
         int end_j = std::min(m, i + d);
+
+        // Track
+        bool rowAllGreater = true;
 
         for (int j = start_j; j <= end_j; j++) {
             if (str1[i - 1] == str2[j - 1]) {
                 dp[i][j] = dp[i - 1][j - 1];
             } else {
-                // delete 
+                // Delete
                 int del = dp[i - 1][j];
                 // Insert
                 int ins = dp[i][j - 1];
                 // Replace
-                int replace = dp[i - 1][j - 1];
-                dp[i][j] = 1 + std::min({del, ins, replace});
+                int rep = dp[i - 1][j - 1];
+                dp[i][j] = 1 + std::min({del, ins, rep});
             }
+            // Not all are greater than d
+            if (dp[i][j] <= d) {
+                rowAllGreater = false;
+            }
+        }
+        // Exit early if row is > d
+        if (rowAllGreater) {
+            return false;
         }
     }
     return (dp[n][m] <= d);
