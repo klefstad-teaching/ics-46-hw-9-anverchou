@@ -119,8 +119,10 @@ std::vector<std::string> get_neighbors(const std::string & word, const std::set<
 // Filter helper function
 std::set<std::string> filter_dictionary(const std::set<std::string> & word_list, int minLen, int maxLen) {
     std::set<std::string> filtered;
+    // Looper of dictionary
     for (const auto & w : word_list) {
         int len = (int)w.size();
+        // Only keep words with a length within minLen, maxLen
         if (len >= minLen && len <= maxLen) {
             filtered.insert(w);
         }
@@ -141,12 +143,13 @@ std::vector<std::string> generate_word_ladder(const std::string & begin_word, co
         return {};
     }
 
+    // Only allow for 2 letters smaller/longer than min/max length
     int L1 = (int) begin_word.size();
     int L2 = (int) end_word.size();
     int minLen = std::max(1, std::min(L1, L2) - 2);
     int maxLen = std::max(L1, L2) + 2;
 
-    // Filter
+    // Filter dictionary
     std::set<std::string> filtered_word_list = filter_dictionary(word_list, minLen, maxLen);
 
     // BFS Queue
@@ -161,6 +164,7 @@ std::vector<std::string> generate_word_ladder(const std::string & begin_word, co
 
     // BFS
     while (!ladder_queue.empty()) {
+        // Take the next ladder in front of the queue
         std::vector<std::string> ladder = ladder_queue.front();
         ladder_queue.pop();
 
@@ -169,7 +173,12 @@ std::vector<std::string> generate_word_ladder(const std::string & begin_word, co
 
         // Generate valid neighbors
         std::vector<std::string> neighbors = get_neighbors(last_word, word_list);
+        // Sort alphabetically to expand in order
+        std::sort(neighbors.begin(), neighbors.end());
+        
+        // Check each neighbor
         for (const std::string & candidate : neighbors) {
+            // If visited = valid candidate for BFS
             if (visited.find(candidate) == visited.end()) {
                 visited.insert(candidate);
 
@@ -194,7 +203,7 @@ void load_words(std::set<std::string> & word_list, const std::string & file_name
     // Cannot open file
     std::ifstream in(file_name.c_str());
     if (!in.is_open()) {
-        std::cerr << " Cannot open file" << std::endl;
+        std::cerr << "Cannot open file" << std::endl;
         std::exit(EXIT_FAILURE);
     }
     std::string w;
